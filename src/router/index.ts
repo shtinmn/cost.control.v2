@@ -3,7 +3,15 @@ import VueRouter, { RouteConfig } from 'vue-router'
 
 Vue.use(VueRouter)
 
-const routes: Array<RouteConfig> = []
+const routes: Array<RouteConfig> = [
+  {
+    path: '/',
+    name: 'main',
+    component: () => import(/* webpackChunkName: "TheMain" */ '@/views/TheMain.vue'),
+    meta: { template: 'AppTemplate' },
+  },
+  { path: '*', redirect: { name: 'main' } },
+]
 
 const router = new VueRouter({
   mode: 'history',
