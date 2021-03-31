@@ -1,9 +1,9 @@
 <template>
-  <div>
-    <header></header>
-    <main>
-      <slot />
-    </main>
-    <footer></footer>
-  </div>
+  <v-app>
+    <v-main>
+      <v-container>
+        <slot />
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
