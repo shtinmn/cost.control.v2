@@ -1,21 +1,33 @@
 <template>
-  <div>
-    <vue-csv-import v-model="parseCsv" :map-fields="fields"></vue-csv-import>
-  </div>
+  <v-container>
+    <v-text-field v-mask="'########'" v-model="plannedExpensePerMonth" label="Планируемые расходы на месяц" outlined />
+    <v-text-field v-mask="'#.#'" v-model="weekendMultiplier" label="Множитель выходного дня" outlined />
+    <ChartBarBusiness :expensePerMonth="plannedExpensePerMonth" :weekendMultiplier="weekendMultiplier" />
+  </v-container>
 </template>
 
 <script lang="ts">
 import { Vue, Component } from 'vue-property-decorator'
 
-import { VueCsvImport } from 'vue-csv-import'
+import ChartBarBusiness from '@/components/ChartBarBusiness.vue'
+
+import { mask } from 'vue-the-mask'
+
+// import { VueCsvImport } from 'vue-csv-import'
 
 @Component({
   components: {
-    VueCsvImport,
+    ChartBarBusiness,
+    // VueCsvImport,
+  },
+  directives: {
+    mask,
   },
 })
 export default class TheMain extends Vue {
-  parseCsv = null
-  fields = { field1: 'Label 1', field2: 'Label 2' }
+  plannedExpensePerMonth = 80000
+  weekendMultiplier = 2
+  // parseCsv = null
+  // fields = { field1: 'Label 1', field2: 'Label 2' }
 }
 </script>
