@@ -2,6 +2,7 @@
   <v-container>
     <v-text-field v-mask="'########'" v-model="plannedExpensePerMonth" label="Планируемые расходы на месяц" outlined />
     <v-text-field v-mask="'#.#'" v-model="weekendMultiplier" label="Множитель выходного дня" outlined />
+    <!-- <vue-csv-import v-model="parseCsv" :map-fields="fields"></vue-csv-import> -->
     <ChartBarBusiness :expensePerMonth="plannedExpensePerMonth" :weekendMultiplier="weekendMultiplier" />
   </v-container>
 </template>
@@ -28,6 +29,6 @@ export default class TheMain extends Vue {
   plannedExpensePerMonth = 80000
   weekendMultiplier = 2
   // parseCsv = null
-  // fields = { field1: 'Label 1', field2: 'Label 2' }
+  // fields = ['Label 1', 'Label 2']
 }
 </script>

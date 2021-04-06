@@ -1,5 +1,5 @@
 <template>
-  <ChartBarView :chart-data="chartData" />
+  <ChartBarView :chart-data="chartData" :options="options" />
 </template>
 
 <script lang="ts">
@@ -7,7 +7,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 
 import ChartBarView from '@/components/ChartBarView.vue'
 
-import type { ChartData } from 'chart.js'
+import type { ChartData, ChartOptions } from 'chart.js'
 
 @Component({
   components: {
@@ -30,6 +30,11 @@ export default class ChartBarBusiness extends Vue {
 
   @Prop({ default: 2 })
   readonly weekendMultiplier!: number
+
+  options: ChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+  }
 
   get chartData(): ChartData {
     return {

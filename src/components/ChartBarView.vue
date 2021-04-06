@@ -1,26 +1,19 @@
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
-
-import { VueConstructor } from 'vue'
+import { Component, Prop, Mixins } from 'vue-property-decorator'
 
 import { Bar, mixins } from 'vue-chartjs'
 
-import type { ChartData } from 'chart.js'
-
-const VueBar = Vue as VueConstructor<Vue & Bar>
+import type { ChartData, ChartOptions } from 'chart.js'
 
 @Component({
-  extends: Bar,
   mixins: [mixins.reactiveProp],
 })
-export default class ChartBarView extends VueBar {
+export default class ChartBarView extends Mixins(Bar) {
   @Prop()
   readonly chartData!: ChartData
 
-  options = {
-    responsive: true,
-    maintainAspectRatio: false,
-  }
+  @Prop()
+  readonly options!: ChartOptions | undefined
 
   mounted(): void {
     this.renderChart(this.chartData, this.options)
