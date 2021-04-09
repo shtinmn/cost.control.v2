@@ -25,7 +25,7 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
-    "types": ["webpack-env", "jest"],
+    "types": ["webpack-env", "jest", "chart.js"],
     "paths": {
       "@/*": ["src/*"]
     },

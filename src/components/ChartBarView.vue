@@ -16,7 +16,7 @@ export default class ChartBarView extends Mixins(Bar) {
   readonly options!: ChartOptions | undefined
 
   mounted(): void {
-    this.renderChart(this.chartData, this.options)
+    // this.renderChart(this.chartData, this.options)
   }
 }
 </script>

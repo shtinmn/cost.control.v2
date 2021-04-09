@@ -1,17 +1,18 @@
 <template>
-  <ChartBarView :chart-data="chartData" :options="options" />
+  <!-- <ChartBarView :chart-data="chartData" :options="options" /> -->
+  <ChartBarView2 :chart-data="chartData" :options="options" />
 </template>
 
 <script lang="ts">
 import { Vue, Component, Prop } from 'vue-property-decorator'
 
-import ChartBarView from '@/components/ChartBarView.vue'
+import ChartBarView2 from '@/components/ChartBarView2.vue'
 
 import type { ChartData, ChartOptions } from 'chart.js'
 
 @Component({
   components: {
-    ChartBarView,
+    ChartBarView2,
   },
 })
 export default class ChartBarBusiness extends Vue {
@@ -23,7 +24,7 @@ export default class ChartBarBusiness extends Vue {
 
   @Prop({
     default() {
-      return [1344, 359, 6798, 4743, 2273]
+      return [1344, 359, 6798, 4743, 2273, 1926, 2219, 2040, 179]
     },
   })
   readonly actualExpenses!: Array<number>
@@ -32,8 +33,13 @@ export default class ChartBarBusiness extends Vue {
   readonly weekendMultiplier!: number
 
   options: ChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
+    plugins: {
+      datalabels: {
+        anchor: 'center',
+        color: 'black',
+        rotation: -90,
+      },
+    },
   }
 
   get chartData(): ChartData {
@@ -42,12 +48,16 @@ export default class ChartBarBusiness extends Vue {
       datasets: [
         {
           label: 'Сколько можно тратить в день',
-          backgroundColor: '#f87979',
+          backgroundColor: 'rgba(75, 192, 192, 0.5)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1,
           data: this.plannedExpenses,
         },
         {
           label: 'Сколько было потрачено',
-          backgroundColor: '#121231',
+          backgroundColor: 'rgba(153, 102, 255, 0.5)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 1,
           data: this.actualExpenses,
         },
       ],
