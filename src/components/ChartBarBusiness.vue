@@ -24,7 +24,7 @@ export default class ChartBarBusiness extends Vue {
 
   @Prop({
     default() {
-      return [1344, 359, 6798, 4743, 2273, 1926, 2219, 2040, 179]
+      return [1344, 359, 6798, 4743, 2273, 1926, 2219, 2040, 4433, 13432]
     },
   })
   readonly actualExpenses!: Array<number>
@@ -59,6 +59,20 @@ export default class ChartBarBusiness extends Vue {
           borderColor: 'rgba(153, 102, 255, 1)',
           borderWidth: 1,
           data: this.actualExpenses,
+        },
+        {
+          label: 'Планируемые траты минус реальные ',
+          data: this.dataForLineChart,
+          backgroundColor: 'green',
+          borderColor: 'green',
+          type: 'line',
+          tension: 0.4,
+          order: 0,
+          datalabels: {
+            labels: {
+              title: null,
+            },
+          },
         },
       ],
     }
@@ -102,6 +116,21 @@ export default class ChartBarBusiness extends Vue {
       }
     }
     return plannedExpenses
+  }
+
+  get dataForLineChart(): Array<number> {
+    if (!this.actualExpenses.length) return []
+    let sumPlannedExpenses = 0
+    let sumActualExpenses = 0
+    let data = []
+    for (let i = 0; this.actualExpenses.length >= i; i++) {
+      if (this.actualExpenses.length >= i) {
+        sumPlannedExpenses += this.plannedExpenses[i]
+        sumActualExpenses += this.actualExpenses[i]
+      }
+      data.push(sumPlannedExpenses - sumActualExpenses)
+    }
+    return data
   }
 
   getDivisor(currentDay: number): number {

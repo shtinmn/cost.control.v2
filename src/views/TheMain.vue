@@ -26,8 +26,8 @@ import { mask } from 'vue-the-mask'
   },
 })
 export default class TheMain extends Vue {
-  plannedExpensePerMonth = 80000
-  weekendMultiplier = 2
+  plannedExpensePerMonth = 90000
+  weekendMultiplier = 5
   // parseCsv = null
   // fields = ['Label 1', 'Label 2']
 }
