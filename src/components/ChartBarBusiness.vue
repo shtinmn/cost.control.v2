@@ -9,6 +9,7 @@ import { Vue, Component, Prop } from 'vue-property-decorator'
 import ChartBarView2 from '@/components/ChartBarView2.vue'
 
 import type { ChartData, ChartOptions } from 'chart.js'
+import { Context } from 'chartjs-plugin-datalabels'
 
 @Component({
   components: {
@@ -24,7 +25,7 @@ export default class ChartBarBusiness extends Vue {
 
   @Prop({
     default() {
-      return [1344, 359, 6798, 4743, 2273, 1926, 2219, 2040, 4433, 13432]
+      return [1344, 359, 6798, 4743, 2273, 1926, 2219, 2040, 4433, 13432, 4100, 1812]
     },
   })
   readonly actualExpenses!: Array<number>
@@ -37,7 +38,18 @@ export default class ChartBarBusiness extends Vue {
       datalabels: {
         anchor: 'center',
         color: 'black',
-        rotation: -90,
+        display(context: Context) {
+          return context.dataset.data[context.dataIndex] ? true : false
+        },
+        formatter: Math.abs,
+      },
+    },
+    scales: {
+      x: {
+        stacked: true,
+      },
+      y: {
+        stacked: true,
       },
     },
   }
@@ -47,36 +59,93 @@ export default class ChartBarBusiness extends Vue {
       labels: this.labels,
       datasets: [
         {
-          label: 'Сколько можно тратить в день',
+          label: 'Планируемый расход или меньше',
           backgroundColor: 'rgba(75, 192, 192, 0.5)',
           borderColor: 'rgba(75, 192, 192, 1)',
           borderWidth: 1,
-          data: this.plannedExpenses,
+          data: this.expenditure,
         },
         {
-          label: 'Сколько было потрачено',
-          backgroundColor: 'rgba(153, 102, 255, 0.5)',
-          borderColor: 'rgba(153, 102, 255, 1)',
+          label: 'Остаток',
+          backgroundColor: 'rgba(0, 128, 0, 0.5',
+          borderColor: 'rgba(0, 128, 0, 1)',
           borderWidth: 1,
-          data: this.actualExpenses,
+          data: this.underspending,
         },
         {
-          label: 'Планируемые траты минус реальные ',
-          data: this.dataForLineChart,
-          backgroundColor: 'green',
-          borderColor: 'green',
-          type: 'line',
-          tension: 0.4,
-          order: 0,
-          datalabels: {
-            labels: {
-              title: null,
-            },
-          },
+          label: 'Перерасход',
+          backgroundColor: 'rgba(255, 0, 0, 0.5)',
+          borderColor: 'rgba(255, 0, 0, 1)',
+          borderWidth: 1,
+          data: this.overspending,
         },
+        // {
+        //   label: 'Сколько можно тратить в день',
+        //   backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        //   borderColor: 'rgba(75, 192, 192, 1)',
+        //   borderWidth: 1,
+        //   data: this.plannedExpenses,
+        //   order: 1,
+        // },
+        // {
+        //   label: 'Сколько было потрачено',
+        //   backgroundColor: 'rgba(153, 102, 255, 0.5)',
+        //   borderColor: 'rgba(153, 102, 255, 1)',
+        //   borderWidth: 1,
+        //   data: this.actualExpenses,
+        //   order: 3,
+        // },
+        // {
+        //   label: 'Планируемые траты минус реальные ',
+        //   data: this.dataForLineChart,
+        //   backgroundColor: 'green',
+        //   borderColor: 'green',
+        //   type: 'line',
+        //   tension: 0.4,
+        //   order: 0,
+        //   datalabels: {
+        //     backgroundColor(context: Context): any {
+        //       return context.active ? context.dataset.backgroundColor : 'white'
+        //     },
+        //     borderColor(context: Context): any {
+        //       return context.dataset.backgroundColor
+        //     },
+        //     borderRadius(context: Context) {
+        //       return context.active ? 0 : 32
+        //     },
+        //     borderWidth: 3,
+        //     color(context): any {
+        //       return context.active ? 'white' : context.dataset.backgroundColor
+        //     },
+        //   },
+        // },
       ],
     }
   }
+
+  created(): void {
+    this.plannedExpenses.forEach((plannedExpense, index) => {
+      if (!this.actualExpenses[index]) {
+        this.expenditure.push(plannedExpense)
+        this.underspending.push(0)
+        this.overspending.push(0)
+      } else if (plannedExpense >= this.actualExpenses[index]) {
+        this.underspending.push(plannedExpense - this.actualExpenses[index])
+        this.expenditure.push(this.actualExpenses[index])
+        this.overspending.push(0)
+      } else {
+        this.underspending.push(0)
+        this.expenditure.push(plannedExpense)
+        this.overspending.push(plannedExpense - this.actualExpenses[index])
+      }
+    })
+  }
+
+  underspending: Array<number> = []
+
+  expenditure: Array<number> = []
+
+  overspending: Array<number> = []
 
   get lastDayOfMonth(): number {
     return new Date(new Date().getFullYear(), this.currentMonth + 1, 0).getDate()
