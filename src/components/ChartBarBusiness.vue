@@ -1,19 +1,18 @@
 <template>
-  <!-- <ChartBarView :chart-data="chartData" :options="options" /> -->
-  <ChartBarView2 :chart-data="chartData" :options="options" />
+  <ChartBarView :chart-data="chartData" :options="options" />
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
-import ChartBarView2 from '@/components/ChartBarView2.vue'
+import ChartBarView from '@/components/ChartBarView.vue'
 
 import type { ChartData, ChartOptions } from 'chart.js'
 import { Context } from 'chartjs-plugin-datalabels'
 
 @Component({
   components: {
-    ChartBarView2,
+    ChartBarView,
   },
 })
 export default class ChartBarBusiness extends Vue {
@@ -25,7 +24,28 @@ export default class ChartBarBusiness extends Vue {
 
   @Prop({
     default() {
-      return [1344, 359, 6798, 4743, 2273, 1926, 2219, 2040, 4433, 13432, 4100, 1812]
+      return [
+        1344,
+        359,
+        6798,
+        4743,
+        2273,
+        1926,
+        2219,
+        2040,
+        4433,
+        13432,
+        4100,
+        1812,
+        1763,
+        2914,
+        3525,
+        2805,
+        4894,
+        3959,
+        2101,
+        763,
+      ]
     },
   })
   readonly actualExpenses!: Array<number>
@@ -43,6 +63,16 @@ export default class ChartBarBusiness extends Vue {
         },
         formatter: Math.abs,
       },
+    },
+    maintainAspectRatio: false,
+
+    onClick: e => {
+      console.log('event', e)
+      // const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
+
+      // Substitute the appropriate scale IDs
+      // const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+      // const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
     },
     scales: {
       x: {
@@ -79,51 +109,31 @@ export default class ChartBarBusiness extends Vue {
           borderWidth: 1,
           data: this.overspending,
         },
-        // {
-        //   label: 'Сколько можно тратить в день',
-        //   backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        //   borderColor: 'rgba(75, 192, 192, 1)',
-        //   borderWidth: 1,
-        //   data: this.plannedExpenses,
-        //   order: 1,
-        // },
-        // {
-        //   label: 'Сколько было потрачено',
-        //   backgroundColor: 'rgba(153, 102, 255, 0.5)',
-        //   borderColor: 'rgba(153, 102, 255, 1)',
-        //   borderWidth: 1,
-        //   data: this.actualExpenses,
-        //   order: 3,
-        // },
-        // {
-        //   label: 'Планируемые траты минус реальные ',
-        //   data: this.dataForLineChart,
-        //   backgroundColor: 'green',
-        //   borderColor: 'green',
-        //   type: 'line',
-        //   tension: 0.4,
-        //   order: 0,
-        //   datalabels: {
-        //     backgroundColor(context: Context): any {
-        //       return context.active ? context.dataset.backgroundColor : 'white'
-        //     },
-        //     borderColor(context: Context): any {
-        //       return context.dataset.backgroundColor
-        //     },
-        //     borderRadius(context: Context) {
-        //       return context.active ? 0 : 32
-        //     },
-        //     borderWidth: 3,
-        //     color(context): any {
-        //       return context.active ? 'white' : context.dataset.backgroundColor
-        //     },
-        //   },
-        // },
+        {
+          label: 'Планируемые траты минус реальные ',
+          data: this.dataForLineChart,
+          backgroundColor: 'green',
+          borderColor: 'green',
+          type: 'line',
+          tension: 0.4,
+          order: 0,
+          datalabels: {
+            labels: {
+              title: null,
+            },
+          },
+        },
       ],
     }
   }
 
   created(): void {
+    this.generatedChartData()
+  }
+
+  @Watch('weekendMultiplier')
+  @Watch('expensePerMonth')
+  generatedChartData(): void {
     this.plannedExpenses.forEach((plannedExpense, index) => {
       if (!this.actualExpenses[index]) {
         this.expenditure.push(plannedExpense)
