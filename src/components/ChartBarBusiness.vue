@@ -7,7 +7,7 @@ import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
 
 import ChartBarView from '@/components/ChartBarView.vue'
 
-import type { ChartData, ChartOptions } from 'chart.js'
+import type { ChartData, ChartOptions, ScriptableContext } from 'chart.js'
 import { Context } from 'chartjs-plugin-datalabels'
 
 @Component({
@@ -45,6 +45,17 @@ export default class ChartBarBusiness extends Vue {
         3959,
         2101,
         763,
+        1599,
+        1480,
+        1620,
+        9976,
+        11868,
+        3307,
+        2464,
+        // 100,
+        // 1000,
+        // 1000,
+        // 12000,
       ]
     },
   })
@@ -66,14 +77,13 @@ export default class ChartBarBusiness extends Vue {
     },
     maintainAspectRatio: false,
 
-    onClick: e => {
-      console.log('event', e)
-      // const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
-
-      // Substitute the appropriate scale IDs
-      // const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
-      // const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
-    },
+    // onClick: e => {
+    //   // console.log('event', e)
+    //   // const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
+    //   // Substitute the appropriate scale IDs
+    //   // const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+    //   // const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
+    // },
     scales: {
       x: {
         stacked: true,
@@ -90,8 +100,10 @@ export default class ChartBarBusiness extends Vue {
       datasets: [
         {
           label: 'Планируемый расход или меньше',
-          backgroundColor: 'rgba(75, 192, 192, 0.5)',
-          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: (context: ScriptableContext<'bar'>): string =>
+            context.dataset.data[context?.dataIndex] > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(255, 0, 0, 0.5)',
+          borderColor: (context: ScriptableContext<'bar'>): string =>
+            context.dataset.data[context.dataIndex] > 0 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 0, 0, 1)',
           borderWidth: 1,
           data: this.expenditure,
         },
@@ -109,20 +121,20 @@ export default class ChartBarBusiness extends Vue {
           borderWidth: 1,
           data: this.overspending,
         },
-        {
-          label: 'Планируемые траты минус реальные ',
-          data: this.dataForLineChart,
-          backgroundColor: 'green',
-          borderColor: 'green',
-          type: 'line',
-          tension: 0.4,
-          order: 0,
-          datalabels: {
-            labels: {
-              title: null,
-            },
-          },
-        },
+        // {
+        //   label: 'Планируемые траты минус реальные ',
+        //   data: this.dataForLineChart,
+        //   backgroundColor: 'green',
+        //   borderColor: 'green',
+        //   type: 'line',
+        //   tension: 0.4,
+        //   order: 0,
+        //   datalabels: {
+        //     labels: {
+        //       title: null,
+        //     },
+        //   },
+        // },
       ],
     }
   }
@@ -134,6 +146,9 @@ export default class ChartBarBusiness extends Vue {
   @Watch('weekendMultiplier')
   @Watch('expensePerMonth')
   generatedChartData(): void {
+    this.underspending = []
+    this.expenditure = []
+    this.overspending = []
     this.plannedExpenses.forEach((plannedExpense, index) => {
       if (!this.actualExpenses[index]) {
         this.expenditure.push(plannedExpense)
@@ -157,15 +172,15 @@ export default class ChartBarBusiness extends Vue {
 
   overspending: Array<number> = []
 
-  get lastDayOfMonth(): number {
+  get amountDaysInMonth(): number {
     return new Date(new Date().getFullYear(), this.currentMonth + 1, 0).getDate()
   }
 
   get labels(): Array<string> {
     const labels = []
-    for (let i = 1; i <= this.lastDayOfMonth; i++) {
+    for (let day = 1; day <= this.amountDaysInMonth; day++) {
       labels.push(
-        new Date(new Date().getFullYear(), this.currentMonth, i).toLocaleDateString('Ru-ru', {
+        new Date(new Date().getFullYear(), this.currentMonth, day).toLocaleDateString('Ru-ru', {
           year: 'numeric',
           month: 'short',
           day: 'numeric',
@@ -178,23 +193,33 @@ export default class ChartBarBusiness extends Vue {
   get plannedExpenses(): Array<number> {
     const plannedExpenses = []
     let amountOfMoneySpent = 0
+    let remainingAmountOfMoney = this.expensePerMonth
 
-    for (let i = 0; i < this.lastDayOfMonth; i++) {
-      let dividend = this.expensePerMonth
-      if (i !== 0) {
-        if (this.actualExpenses[i - 1]) amountOfMoneySpent += this.actualExpenses[i - 1]
-        else amountOfMoneySpent += plannedExpenses[i - 1]
+    for (let day = 1; day <= this.amountDaysInMonth; day++) {
+      amountOfMoneySpent += this.getAmountOfMoneySpentYesterday(day)
 
-        dividend = this.expensePerMonth - amountOfMoneySpent
-      }
+      remainingAmountOfMoney = this.expensePerMonth - amountOfMoneySpent
 
-      if (this.isDayOff(i)) {
-        plannedExpenses.push(Math.round(this.weekendMultiplier * (dividend / this.getDivisor(i))))
-      } else {
-        plannedExpenses.push(Math.round(dividend / this.getDivisor(i)))
-      }
+      plannedExpenses.push(this.getPlannedExpensesForCurrentDay(day, remainingAmountOfMoney))
+
+      if (this.actualExpenses.length < plannedExpenses.length) amountOfMoneySpent += plannedExpenses[day - 1]
     }
     return plannedExpenses
+  }
+
+  getAmountOfMoneySpentYesterday(currentDay: number): number {
+    if (currentDay === 1) return 0
+
+    if (this.actualExpenses.length + 1 >= currentDay) return this.actualExpenses[currentDay - 2]
+
+    return 0
+  }
+
+  getPlannedExpensesForCurrentDay(currendDay: number, remainingAmountOfMoney: number): number {
+    if (this.isDayOff(currendDay))
+      return Math.round(this.weekendMultiplier * (remainingAmountOfMoney / this.getRemainingAmountDivisor(currendDay)))
+
+    return Math.round(remainingAmountOfMoney / this.getRemainingAmountDivisor(currendDay))
   }
 
   get dataForLineChart(): Array<number> {
@@ -212,25 +237,26 @@ export default class ChartBarBusiness extends Vue {
     return data
   }
 
-  getDivisor(currentDay: number): number {
-    let divisor = this.lastDayOfMonth - currentDay
+  getRemainingAmountDivisor(currentDay: number): number {
+    let divisor = this.amountDaysInMonth + 1 - currentDay
+
     if (this.weekendMultiplier === 1) return divisor
-    else {
-      let i = currentDay
-      for (; i < this.lastDayOfMonth; i++) {
-        if (this.isDayOff(i)) divisor += 1 * this.weekendMultiplier - 1
-      }
-      return divisor
+
+    for (let day = currentDay; day <= this.amountDaysInMonth; day++) {
+      if (this.isDayOff(day)) divisor += this.weekendMultiplier - 1
     }
+
+    return divisor
   }
 
-  isDayOff(currentDay: number): boolean {
+  isDayOff(currentDay: number, year = new Date().getFullYear()): boolean {
     if (
-      new Date(new Date().getFullYear(), this.currentMonth, currentDay + 1).getDay() > 5 ||
-      new Date(new Date().getFullYear(), this.currentMonth, currentDay + 1).getDay() === 0
+      new Date(year, this.currentMonth, currentDay).getDay() > 5 ||
+      new Date(year, this.currentMonth, currentDay).getDay() === 0
     )
       return true
-    else return false
+
+    return false
   }
 }
 </script>

@@ -14,7 +14,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels'
 import type { ChartData, ChartOptions, Chart as ChartType } from 'chart.js'
 
 @Component
-export default class ChartBarView2 extends Vue {
+export default class ChartBarView extends Vue {
   @Ref('chartBar')
   refChartBar!: HTMLCanvasElement
 
@@ -38,14 +38,7 @@ export default class ChartBarView2 extends Vue {
   @Watch('chartData')
   @Watch('options')
   updateChart(): void {
-    console.log('updateChart')
-
     this.chartBar.data.datasets = this.chartData.datasets
-
-    console.log('this.chartData.datasets', this.chartData.datasets)
-
-    console.log('chartbar', this.chartBar.options)
-    console.log('options', this.options)
 
     this.chartBar.update()
   }
