@@ -99,7 +99,7 @@ export default class ChartBarBusiness extends Vue {
       labels: this.labels,
       datasets: [
         {
-          label: 'Планируемый расход или меньше',
+          label: 'Планируемый расход',
           backgroundColor: (context: ScriptableContext<'bar'>): string =>
             context.dataset.data[context?.dataIndex] > 0 ? 'rgba(75, 192, 192, 0.5)' : 'rgba(255, 0, 0, 0.5)',
           borderColor: (context: ScriptableContext<'bar'>): string =>
@@ -108,7 +108,7 @@ export default class ChartBarBusiness extends Vue {
           data: this.expenditure,
         },
         {
-          label: 'Остаток',
+          label: 'Недорасход',
           backgroundColor: 'rgba(0, 128, 0, 0.5',
           borderColor: 'rgba(0, 128, 0, 1)',
           borderWidth: 1,
@@ -121,20 +121,20 @@ export default class ChartBarBusiness extends Vue {
           borderWidth: 1,
           data: this.overspending,
         },
-        // {
-        //   label: 'Планируемые траты минус реальные ',
-        //   data: this.dataForLineChart,
-        //   backgroundColor: 'green',
-        //   borderColor: 'green',
-        //   type: 'line',
-        //   tension: 0.4,
-        //   order: 0,
-        //   datalabels: {
-        //     labels: {
-        //       title: null,
-        //     },
-        //   },
-        // },
+        {
+          label: 'Средний расход',
+          data: this.dataForLineChart,
+          backgroundColor: 'green',
+          borderColor: 'green',
+          type: 'line',
+          tension: 0.4,
+          order: 0,
+          datalabels: {
+            labels: {
+              title: null,
+            },
+          },
+        },
       ],
     }
   }
@@ -149,7 +149,7 @@ export default class ChartBarBusiness extends Vue {
     this.underspending = []
     this.expenditure = []
     this.overspending = []
-    this.plannedExpenses.forEach((plannedExpense, index) => {
+    this.dynamicallyPlannedExpenses.forEach((plannedExpense, index) => {
       if (!this.actualExpenses[index]) {
         this.expenditure.push(plannedExpense)
         this.underspending.push(0)
@@ -190,7 +190,7 @@ export default class ChartBarBusiness extends Vue {
     return labels
   }
 
-  get plannedExpenses(): Array<number> {
+  get dynamicallyPlannedExpenses(): Array<number> {
     const plannedExpenses = []
     let amountOfMoneySpent = 0
     let remainingAmountOfMoney = this.expensePerMonth
@@ -203,6 +203,20 @@ export default class ChartBarBusiness extends Vue {
       plannedExpenses.push(this.getPlannedExpensesForCurrentDay(day, remainingAmountOfMoney))
 
       if (this.actualExpenses.length < plannedExpenses.length) amountOfMoneySpent += plannedExpenses[day - 1]
+    }
+    return plannedExpenses
+  }
+
+  get staticallyPlannedExpenses(): Array<number> {
+    const plannedExpenses = []
+    let amountOfMoneySpent = 0
+    let remainingAmountOfMoney = this.expensePerMonth
+    for (let day = 1; day <= this.amountDaysInMonth; day++) {
+      remainingAmountOfMoney = this.expensePerMonth - amountOfMoneySpent
+
+      plannedExpenses.push(this.getPlannedExpensesForCurrentDay(day, remainingAmountOfMoney))
+
+      amountOfMoneySpent += plannedExpenses[day - 1]
     }
     return plannedExpenses
   }
@@ -227,9 +241,9 @@ export default class ChartBarBusiness extends Vue {
     let sumPlannedExpenses = 0
     let sumActualExpenses = 0
     let data = []
-    for (let i = 0; this.actualExpenses.length >= i; i++) {
+    for (let i = 0; this.actualExpenses.length > i; i++) {
       if (this.actualExpenses.length >= i) {
-        sumPlannedExpenses += this.plannedExpenses[i]
+        sumPlannedExpenses += this.staticallyPlannedExpenses[i]
         sumActualExpenses += this.actualExpenses[i]
       }
       data.push(sumPlannedExpenses - sumActualExpenses)
