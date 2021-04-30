@@ -1,6 +1,8 @@
 <template>
-  <v-col class="chartBarWrapper">
-    <canvas ref="chartBar" id="chartBar" class="chartBar" />
+  <v-col>
+    <v-row>
+      <canvas ref="chartBar" id="chartBar" class="chartBar" />
+    </v-row>
   </v-col>
 </template>
 
@@ -44,10 +46,3 @@ export default class ChartBarView extends Vue {
   }
 }
 </script>
-<style lang="sass" scoped>
-.chartBarWrapper
-  position: relative
-  width: 100%
-  min-height: 60vh
-  overflow-x: auto
-</style>
