@@ -41,7 +41,7 @@ export default class ChartBarView extends Vue {
   @Watch('options')
   updateChart(): void {
     this.chartBar.data.datasets = this.chartData.datasets
-
+    this.chartBar.data.labels = this.chartData.labels
     this.chartBar.update()
   }
 }

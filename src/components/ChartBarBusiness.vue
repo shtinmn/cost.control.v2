@@ -3,9 +3,11 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop, Watch } from 'vue-property-decorator'
+import { Vue, Component, Watch } from 'vue-property-decorator'
 
 import ChartBarView from '@/components/ChartBarView.vue'
+
+import { chartModule } from '@/store/chart'
 
 import type { ChartData, ChartOptions, ScriptableContext } from 'chart.js'
 import { Context } from 'chartjs-plugin-datalabels'
@@ -16,55 +18,26 @@ import { Context } from 'chartjs-plugin-datalabels'
   },
 })
 export default class ChartBarBusiness extends Vue {
-  @Prop({ default: 80000 })
-  readonly expensePerMonth!: number
+  chartModule = chartModule.context(this.$store)
 
-  @Prop({ default: new Date().getMonth() })
-  readonly currentMonth!: number
+  get currentMonth(): number {
+    return this.chartModule.state.selectedMonth
+  }
 
-  @Prop({
-    default() {
-      return [
-        1344,
-        359,
-        6798,
-        4743,
-        2273,
-        1926,
-        2219,
-        2040,
-        4433,
-        13432,
-        4100,
-        1812,
-        1763,
-        2914,
-        3525,
-        2805,
-        4894,
-        3959,
-        2101,
-        763,
-        1599,
-        1480,
-        1620,
-        9976,
-        11868,
-        3307,
-        2464,
-        // 100,
-        // 1000,
-        // 1000,
-        // 12000,
-      ]
-    },
-  })
-  readonly actualExpenses!: Array<number>
+  get expensePerMonth(): number {
+    return this.chartModule.state.plannedExpensePerMonth
+  }
 
-  @Prop({ default: 2 })
-  readonly weekendMultiplier!: number
+  get actualExpenses(): Array<number> {
+    return this.chartModule.state.actualExpenses
+  }
+
+  get weekendMultiplier(): number {
+    return this.chartModule.state.weekendMultiplier
+  }
 
   options: ChartOptions = {
+    responsive: true,
     plugins: {
       datalabels: {
         anchor: 'center',
@@ -75,15 +48,6 @@ export default class ChartBarBusiness extends Vue {
         formatter: Math.abs,
       },
     },
-    maintainAspectRatio: false,
-
-    // onClick: e => {
-    //   // console.log('event', e)
-    //   // const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
-    //   // Substitute the appropriate scale IDs
-    //   // const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
-    //   // const dataY = chart.scales.y.getValueForPixel(canvasPosition.y);
-    // },
     scales: {
       x: {
         stacked: true,
@@ -145,6 +109,8 @@ export default class ChartBarBusiness extends Vue {
 
   @Watch('weekendMultiplier')
   @Watch('expensePerMonth')
+  @Watch('currentMonth')
+  @Watch('actualExpenses')
   generatedChartData(): void {
     this.underspending = []
     this.expenditure = []

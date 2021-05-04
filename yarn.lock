@@ -1201,7 +1201,7 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@mdi/font@5.9.55":
+"@mdi/font@^5.9.55":
   version "5.9.55"
   resolved "https://registry.yarnpkg.com/@mdi/font/-/font-5.9.55.tgz#41acd50b88073ded7095fc3029d8712b6e12f38e"
   integrity sha512-jswRF6q3eq8NWpWiqct6q+6Fg/I7nUhrxYJfiEM8JJpap0wVJLQdbKtyS65GdlK7S7Ytnx3TTi/bmw+tBhkGmg==
@@ -11315,6 +11315,11 @@ vuetify@^2.4.0:
   version "2.4.8"
   resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.4.8.tgz#c6e883a9b2560f9906bd8b9f9eb58b001200aeef"
   integrity sha512-rJYyzSO4Qsm/Q79W4FAUedgIDzUvx2uXzXXQ7OB2z9kAAkVOpTdMFY0CnpBcvlYbXOYy/mJ81/yUCV1ZAvJ3FQ==
+
+vuex-smart-module@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/vuex-smart-module/-/vuex-smart-module-0.5.0.tgz#b7973071a517a075a1bf8f7bb1b508eb5ae3b18b"
+  integrity sha512-g/dXwtL4oG0fr4ekxVPmx2VLeI2M+5om6BwReS4TMkawa0qROI4DZMuqvmkTg8SCAR9zbLoTYV0GgzVSfyfERw==
 
 vuex@^3.4.0:
   version "3.6.2"
